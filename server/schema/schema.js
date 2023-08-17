@@ -1,4 +1,3 @@
-// Mongose models
 const Project = require("../models/Project");
 const Client = require("../models/Client");
 
@@ -6,13 +5,13 @@ const {
   GraphQLObjectType,
   GraphQLID,
   GraphQLString,
-  GraphQLList,
   GraphQLSchema,
+  GraphQLList,
   GraphQLNonNull,
   GraphQLEnumType,
 } = require("graphql");
 
-//Project Type
+// Project Type
 const ProjectType = new GraphQLObjectType({
   name: "Project",
   fields: () => ({
@@ -29,7 +28,7 @@ const ProjectType = new GraphQLObjectType({
   }),
 });
 
-//Client Type
+// Client Type
 const ClientType = new GraphQLObjectType({
   name: "Client",
   fields: () => ({
@@ -72,7 +71,7 @@ const RootQuery = new GraphQLObjectType({
   },
 });
 
-//Mutations
+// Mutations
 const mutation = new GraphQLObjectType({
   name: "Mutation",
   fields: {
@@ -93,13 +92,19 @@ const mutation = new GraphQLObjectType({
         return client.save();
       },
     },
-    //Delete a client
+    // Delete a client
     deleteClient: {
       type: ClientType,
       args: {
         id: { type: GraphQLNonNull(GraphQLID) },
       },
       resolve(parent, args) {
+        Project.find({ clientId: args.id }).then((projects) => {
+          projects.forEach((project) => {
+            project.deleteOne();
+          });
+        });
+
         return Client.findByIdAndRemove(args.id);
       },
     },
